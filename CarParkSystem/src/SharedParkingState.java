@@ -12,11 +12,14 @@ public class SharedParkingState {
 	private boolean accessing=false; // true a thread has a lock, false otherwise
 	private int threadsWaiting=0; // number of waiting writers
 	private boolean Qactive =false;
+	private static int TID=0;
+	private CreateLog myLogFile;
 
 // Constructor	
 	
-	SharedParkingState(double SharedVariable) {
+	SharedParkingState(double SharedVariable, CreateLog LogObject) {
 		ParkingSpaces = SharedVariable;
+		myLogFile=LogObject;
 	}
 
 //Attempt to aquire a lock
@@ -50,25 +53,30 @@ public class SharedParkingState {
     /* The processInput method */
 
 	public synchronized String processInput(String myThreadName, String theInput) {
-    		System.out.println(myThreadName + " received "+ theInput);
+			myLogFile.WriteFile("\n TID: "+TID+"\n");
+			TID++;
+			myLogFile.WriteFile("Message Recieved from "+ myThreadName +"\n");
+    		//System.out.println(myThreadName + " received "+ theInput);
 			String theOutput = null;
 			
     		// Check what the client said
     		if (theInput.equalsIgnoreCase("Car has arrived")) {
 
-				System.out.println("A car has arrived at " + myThreadName);
+				myLogFile.WriteFile("A car has arrived at " + myThreadName+"\n");
+				//System.out.println("A car has arrived at " + myThreadName);
     			//Correct request
     			
     			if (ParkingSpaces==0){
 					q.add(CarWaitingID);
-					System.out.println(myThreadName + " requested a space. Car held in queue as there are " + ParkingSpaces + " availible. "+"\n Queue size is "+ q.size());
+					myLogFile.WriteFile(myThreadName + " requested a space. Car held in queue as there are " + ParkingSpaces + " availible. "+"\n Queue size is "+ q.size()+"\n");
+					//System.out.println(myThreadName + " requested a space. Car held in queue as there are " + ParkingSpaces + " availible. "+"\n Queue size is "+ q.size());
 					theOutput = "No Space car has been added to queue";
 					++CarWaitingID;
 				}
 				
 				else if (ParkingSpaces>0) {
-    				
-    				System.out.println(myThreadName + " requested a space.\n Car allowed to enter as there were " + ParkingSpaces + " spaces availible");
+    				myLogFile.WriteFile(myThreadName + " requested a space.\n Car allowed to enter as there were " + ParkingSpaces + " spaces availible"+"\n");
+    				//System.out.println(myThreadName + " requested a space.\n Car allowed to enter as there were " + ParkingSpaces + " spaces availible");
 					theOutput = "Space availible allow car to enter";
 					--ParkingSpaces;
     			}
@@ -78,29 +86,37 @@ public class SharedParkingState {
 				
 				if(ParkingSpaces<5)
 				{
-					System.out.println("A car left parking space form " + myThreadName);
+					myLogFile.WriteFile("A car left parking space form " + myThreadName+"\n");
+					//System.out.println("A car left parking space form " + myThreadName);
 					++ParkingSpaces;
 					theOutput = "Parking Space updated";
 					Qactive=WaitCheck();
 					if(Qactive){
+						// crem is Car to be removed thus (crem)oved
 						int crem = q.remove();
+						myLogFile.WriteFile("Car ID "+ crem+ " has entered the car park from queue"+"\n");
 						System.out.println("Car ID "+ crem+ " has entered the car park from queue");
 						--ParkingSpaces;
 						theOutput= theOutput.concat(". \n A queued car was allowed to enter");
 					}
 				}
 				else {
-					System.out.println("Message recieved from " + myThreadName+" A car left parking space form. \n Error Car park empty");
+					myLogFile.WriteFile("Message recieved from " + myThreadName+" A car left parking space form. \n Error Car park already empty"+"\n");
+					//System.out.println("Message recieved from " + myThreadName+" A car left parking space form. \n Error Car park empty");
 					theOutput = "Car Park is empty ???";
 				}
 				
 				
 				
 			}
-			else {System.out.println("Error - thread call not recognised.");theOutput="Error Command not found";}//incorrect request
- 
-     		//Return the output message to the ActionServer
-    		System.out.println(theOutput);
+			else {System.out.println("Error - thread call not recognised.");
+				theOutput="Error Command not found";
+				myLogFile.WriteFile("Error Command not found"+"\n");
+			}//incorrect request
+			
+     		//Return the output message to the PSERVER
+			System.out.println(theOutput);
+			//myLogFile.WriteFile("Output:"+theOutput+"\n Transaction Successful"+"\n");
     		return theOutput;
 		}
 		

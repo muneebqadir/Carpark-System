@@ -1,6 +1,14 @@
 import java.io.*;
 import java.net.*;
+
+
+
 public class EntryGate2Client {
+
+// Setting CLient ID i.e ThreadName
+    public static String EntryClientClientID = "EntryGate2";
+    private static int CarCount = 0;
+
     public static void main(String[] args) throws IOException {
 
         // Set up the socket, in and out variables
@@ -8,19 +16,19 @@ public class EntryGate2Client {
         Socket EntryClientSocket = null;
         PrintWriter out = null;
         BufferedReader in = null;
-        int ActionSocketNumber = 4545;
-        String ActionServerName = "localhost";
-        String EntryClientClientID = "EntryGate2";
+        int ServerSocket = 4545;
+        String ParkingServerName = "localhost";
+        char UserInput;
 
         try {
-            EntryClientSocket = new Socket(ActionServerName, ActionSocketNumber);
+            EntryClientSocket = new Socket(ParkingServerName, ServerSocket);
             out = new PrintWriter(EntryClientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(EntryClientSocket.getInputStream()));
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host: localhost ");
             System.exit(1);
         } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to: "+ ActionSocketNumber);
+            System.err.println("Couldn't get I/O for the connection to: "+ ServerSocket);
             System.exit(1);
         }
 
@@ -31,17 +39,34 @@ public class EntryGate2Client {
         System.out.println("Initialised " + EntryClientClientID + " client and IO connections");
         
         // This is modified as it's the client that speaks first
+        
+        System.out.println("Press N for new car or T to terminate client");
 
         while (true) {
             
             fromUser = stdIn.readLine();
-            
-            if (fromUser != null) {
-                System.out.println(EntryClientClientID + " sending " + fromUser + " to ActionServer");
-                out.println(fromUser);
+            UserInput = ValidateUinput(fromUser);
+            if(UserInput=='T'){
+                System.out.println("Client Terminated");
+                System.exit(1);
             }
-            fromServer = in.readLine();
-            System.out.println(EntryClientClientID + " received " + fromServer + " from ActionServer");
+            else if(UserInput=='N'){
+                System.out.println("A new car has arrived");
+                //System.out.println(EntryClientClientID + " sending message to ParkingServer");
+                ++CarCount;
+                 out.println("Car has arrived");
+                 fromServer = in.readLine();
+                 System.out.println(EntryClientClientID + " received " + fromServer + " from Parking Server");
+                 if(fromServer.equals("No Space add car to queue")){
+                     System.out.println("Car waiting as there is no space availible.");
+                 }
+                 else if(fromServer.equals("Space availible allow car to enter")){
+                 System.out.println("Car has entered the car park");
+                 }
+             }
+             else{
+                System.out.println("Invalid input only N or T (Single Characters) are permitted.");
+            }
         }
             
         
@@ -52,14 +77,15 @@ public class EntryGate2Client {
        // ActionClientSocket.close();
     }
     
-    // public static char ValidateUinput(String inp){
-    //     char Uchoice = 'F';
-    //     if(inp.length()==1 && inp !=null){
-    //         inp = inp.toUpperCase();
-    //         Uchoice = inp.charAt(0);
-    //         if(Uchoice=='E' || Uchoice=='N' ) {
-    //             return Uchoice;
-    //         }
-    //     }
-    // return 'F';
+    public static char ValidateUinput(String inp){
+        char Uchoice = 'F';
+        if(inp.length()==1 && inp !=null){
+            inp = inp.toUpperCase();
+            Uchoice = inp.charAt(0);
+            if(Uchoice=='T' || Uchoice=='N' ) {
+                return Uchoice;
+            }
+        }
+    return 'F';
+    }
 }

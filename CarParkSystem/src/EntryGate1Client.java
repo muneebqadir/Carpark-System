@@ -54,6 +54,8 @@ public class EntryGate1Client {
                //System.out.println(EntryClientClientID + " sending message to ParkingServer");
                ++CarCount;
                 out.println("Car has arrived");
+                //      ORPHAN CHECK 
+                //System.exit(1);
                 fromServer = in.readLine();
                 System.out.println(EntryClientClientID + " received " + fromServer + " from Parking Server");
                 if(fromServer.equals("No Space add car to queue")){

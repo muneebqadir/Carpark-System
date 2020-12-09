@@ -27,20 +27,31 @@ public class ExitGate2Client {
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         String fromServer;
         String fromUser;
+        char UserInput;
 
         System.out.println("Initialised " + ClientID + " client and IO connections");
         
         // This is modified as it's the client that speaks first
-
+        System.out.println("Please press E for car to exit and T to Terminate Client");
         while (true) {
             
             fromUser = stdIn.readLine();
-            if (fromUser != null) {
-                System.out.println(ClientID + " sending " + fromUser + " to ActionServer");
-                out.println(fromUser);
+            UserInput = ValidateUinput(fromUser);
+            if(UserInput=='E'){
+                System.out.println(ClientID + " sending message to ParkingServer");
+                out.println("Car has Left");
+                fromServer = in.readLine();
+                System.out.println(ClientID + " received " + fromServer + " from ParkingServer");
             }
-            fromServer = in.readLine();
-            System.out.println(ClientID + " received " + fromServer + " from ActionServer");
+            else if (UserInput=='T'){
+                System.out.println("Client Terminating");
+                System.exit(1);
+            }
+            else{
+                System.out.println("Invalid input only E or T (Single Characters) are permitted.");
+            }
+            
+            
         }
             
         
@@ -49,5 +60,17 @@ public class ExitGate2Client {
        // in.close();
        // stdIn.close();
        // ActionClientSocket.close();
+    }
+
+    public static char ValidateUinput(String inp){
+        char Uchoice = 'F';
+        if(inp.length()==1 && inp !=null){
+            inp = inp.toUpperCase();
+            Uchoice = inp.charAt(0);
+            if(Uchoice=='E' ||Uchoice=='T') {
+                return Uchoice;
+            }
+        }
+    return 'F';
     }
 }
