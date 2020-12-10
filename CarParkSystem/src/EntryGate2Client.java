@@ -57,7 +57,7 @@ public class EntryGate2Client {
                  out.println("Car has arrived");
                  fromServer = in.readLine();
                  System.out.println(EntryClientClientID + " received " + fromServer + " from Parking Server");
-                 if(fromServer.equals("No Space add car to queue")){
+                 if(fromServer.equals("No Space car has been added to queue")){
                      System.out.println("Car waiting as there is no space availible.");
                  }
                  else if(fromServer.equals("Space availible allow car to enter")){
